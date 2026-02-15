@@ -1,4 +1,4 @@
-# 🗳️ Live Polling System (Teacher–Student)
+# 🗳️ Real-Time Polling Room (Teacher–Student)
 
 A **real-time polling application** where teachers can create live polls and students can vote instantly, chat, and see live results.  
 Built with **MERN Stack + Socket.IO** with persistent storage.
