@@ -1,50 +1,45 @@
 # 🗳️ Live Polling System (Teacher–Student)
 
-A real-time polling application where a **teacher can create live polls** and **students can participate instantly**, chat, and view results.  
-Built using **MERN Stack + Socket.IO** with real-time updates.
+A **real-time polling application** where teachers can create live polls and students can vote instantly, chat, and see live results.  
+Built with **MERN Stack + Socket.IO** with persistent storage.
+
+---
+
+## 📖 Context / About the Project
+This is a **Full-Stack Assignment: Real-Time Poll Rooms**.  
+The goal is to allow users to **create polls, share via link, and collect votes in real-time**, while ensuring fairness and preventing abuse.  
+Demonstrates **React, Node.js, MongoDB, and Socket.IO** skills along with real-time event handling.
 
 ---
 
 ## 🚀 Features
 
-### 👩‍🏫 Teacher
-- Create live polls with multiple options
-- Set poll duration
-- View real-time voting results
-- View poll history with result analytics
-- Chat with students
-- Kick out students from the session
+**Teacher**
+- Create polls with multiple options  
+- Set poll duration  
+- View live results and poll history  
+- Chat with students  
+- Kick out participants  
 
-### 👨‍🎓 Student
-- Join ongoing polls (even if joined late)
-- Submit votes (one vote per poll)
-- View live results after voting
-- Chat with teacher and other students
-- Automatically redirected if kicked out
+**Student**
+- Join via shareable link  
+- Submit single vote per poll  
+- View live results  
+- Chat with teacher and other students  
+- Automatically redirected if kicked out  
 
 ---
 
 ## 🛠️ Tech Stack
-
-### Frontend
-- React (Vite)
-- Tailwind CSS
-- Socket.IO Client
-- React Router
-
-### Backend
-- Node.js
-- Express.js
-- MongoDB + Mongoose
-- Socket.IO
-- REST APIs
+- **Frontend:** React (Vite), Tailwind CSS, Socket.IO Client, React Router  
+- **Backend:** Node.js, Express.js, MongoDB + Mongoose, Socket.IO  
 
 ---
 
 ## 🔄 Real-Time Events (Socket.IO)
 
 | Event | Description |
-|------|------------|
+|-------|------------|
 | `create_poll` | Teacher creates a poll |
 | `poll_started` | Broadcasts active poll |
 | `submit_vote` | Student submits vote |
@@ -57,74 +52,48 @@ Built using **MERN Stack + Socket.IO** with real-time updates.
 
 ---
 
-## 📊 Poll History
-- Displays **all past polls**
-- Shows **all options**, even those with `0%` votes
-- Percentage calculated based on total votes
-- Sorted by most recent poll first
+## ✅ Fairness / Anti-Abuse Mechanisms
+1. **One vote per student** – prevents multiple votes using unique session/user ID checks  
+2. **Kick-out & session validation** – prevents unauthorized users from voting; kicked-out users are redirected immediately  
 
 ---
 
-## 🌐 API Endpoints
-
-### Poll APIs
-
-GET /api/poll/active
-GET /api/poll/history
-POST /api/poll/create
-POST /api/poll/vote
-
+## 🔹 Edge Cases Handled
+- Students joining late still see current poll and live results  
+- Votes submitted after poll ends are rejected  
+- Poll options with 0 votes are still displayed  
+- Kicked-out students cannot vote or rejoin  
 
 ---
 
-## ⚙️ Environment Variables
+## ⚠️ Known Limitations / Future Improvements
+- No IP-based duplicate vote prevention  
+- Limited analytics and visualization  
+- No authentication; anyone with link can join  
 
-### Backend (`.env`)
-```env
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
+---
 
-Frontend
+## 🌐 Deployment and Links
+- **Deployed App:** [https://real-time-poll-rooms-f.onrender.com](https://real-time-poll-rooms-f.onrender.com)  
+- **GitHub Repository:** [https://github.com/arvind7218/Real-Time-Poll-Rooms](https://github.com/arvind7218/Real-Time-Poll-Rooms)  
+- **Demo Video:** [Optional](https://drive.google.com/file/d/16GKr0R2qUsVAb-CTL-ZmNBmpWBR-c2GZ/view?usp=sharing)  
 
-Ensure Socket.IO connects to backend:
+---
 
-io("https://your-backend-url.onrender.com")
+## 🧪 How to Run Locally
 
-🧪 How to Run Locally
-Backend
+**Backend**
+```bash
 cd backend
 npm install
 npm run dev
 
-Frontend
+**Frontend**
+
 cd frontend
 npm install
 npm run dev
 
-🚀 Deployment
-
-Backend: Render
-
-Frontend: Vercel
-
-Auto-deploy enabled via GitHub
-
-✅ Assignment Requirements Covered
-
-Real-time polling ✔️
-
-Late join handling ✔️
-
-One vote per student ✔️
-
-Live chat ✔️
-
-Poll history ✔️
-
-Kick-out feature ✔️
-
-Clean UI aligned with design ✔️
 
 
-Author
-Niranjan C B
+Author: Arvind Chauhan
