@@ -1,59 +1,74 @@
-import React, { useState } from 'react'
-import PollBadge from '../components/PollBadge'
+import React, { useState } from 'react';
+import PollBadge from '../components/PollBadge';
 import { useNavigate } from 'react-router-dom';
+
 export default function StudentOnBoard() {
 
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-    const [name, setName] = useState('');
-    const navigate = useNavigate();
+  const validateEmail = (value) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  };
 
-    const handleSubmit = ()=>{
+  const handleSubmit = () => {
 
-        sessionStorage.setItem("studentName" , name);
-        sessionStorage.setItem("studentId" , crypto.randomUUID());
-        navigate("/student/poll")
-
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address");
+      return;
     }
+
+    // Store email as studentId (unique per email)
+    sessionStorage.setItem("studentEmail", email);
+    sessionStorage.setItem("studentId", email);
+
+    navigate("/student/poll");
+  };
+
   return (
     <div className='flex flex-col justify-center items-center min-h-screen bg-white'>
-            <div >
-                <PollBadge />
-    
-            </div>
 
-            <div className="mt-6.5 w-245.45 h-12.5 flex flex-col items-center gap-17.25">
-                <div className='w-184.25 h-12.5 gap-6.5'>
+      <PollBadge />
 
-                <h3 className="font-[Sora] font-semibold text-[40px] leading-none text-black text-center">
-                    Let's get started
-                </h3>
-                </div>
+      <h3 className="mt-10 text-4xl font-semibold text-black text-center">
+        Let's get started
+      </h3>
 
-            </div>
-            <div className='w-190.5 h-17.25 mt-3' >
+      <p className="mt-4 text-lg text-black/50 text-center w-[600px]">
+        Enter your email to participate in live polls and submit answers.
+      </p>
 
-                <p className="font-[Sora] font-light text-[19px] leading-none text-black/50 text-center">
-                     If you’re a student, you’ll be able to submit your answers, participate in live polls, and see how your responses compare with your classmates
-                </p>
-            </div>
+      <div className='mt-10 w-[500px] flex flex-col gap-2'>
+        <label className='text-lg font-medium'>Enter your Email</label>
 
-            <div className='w-126.75 h-23.75 mt-7.75 flex flex-col gap-3' >
+        <input
+          type='email'
+          value={email}
+          onChange={e => {
+            setEmail(e.target.value);
+            setError('');
+          }}
+          className='h-12 rounded bg-[#F2F2F2] px-4 text-black text-lg'
+          placeholder="example@email.com"
+        />
 
-                <label className='w-126.75 h-5.75 text-[18px] font-[Sora] font-normal leading-none'>Enter your name</label>
-                <input type='text' className='w-126.75 h-15 rounded-xs bg-[#F2F2F2] font-[Sora] font-normal pl-4 py-2 text-black text-[18px]' onChange={e=> setName(e.target.value)} value={name}  />
+        {error && (
+          <p className="text-red-500 text-sm">{error}</p>
+        )}
+      </div>
 
-            </div>
+      <button
+        onClick={handleSubmit}
+        disabled={!email}
+        className="mt-10 w-[230px] h-[55px] rounded-full
+        text-white font-semibold
+        bg-gradient-to-r from-[#8F64E1] to-[#1D68BD]
+        hover:opacity-90 active:scale-95 transition"
+      >
+        Continue
+      </button>
 
-             <button
-                onClick={handleSubmit}
-                disabled={!name}
-                className="mt-11.5 w-[233.93px] h-[57.58px] rounded-[34px]
-                 font-[Sora] font-semibold text-[16px] text-white
-                 flex items-center justify-center transition bg-linear-to-r from-[#8F64E1] to-[#1D68BD] hover:opacity-90 active:scale-[0.98] cursor-pointer"
-                    
-            >
-                Continue
-            </button>
     </div>
-  )
+  );
 }
