@@ -66,7 +66,7 @@ export default function TeacherLive() {
 	================================ */
 	const handleShare = async () => {
 		// const link = `${window.location.origin}/student/poll`;
-		const link = `https://real-time-poll-rooms-b.onrender.com/student`;
+		const link = `https://real-time-poll-rooms-f.onrender.com`;
 
 		try {
 			await navigator.clipboard.writeText(link);
