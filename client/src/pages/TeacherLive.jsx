@@ -3,7 +3,7 @@ import { useSocket } from "../hooks/useSocket";
 import { API } from "../api";
 import React from "react";
 import { usePollTimer } from "../hooks/usePollTime";
-import { Eye, Share2 } from "lucide-react";
+import { Eye, Share2, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Chat from "../components/Chat";
 import ChatPopup from "../components/ChatPopUp";
@@ -15,19 +15,22 @@ export default function TeacherLive() {
 	const [results, setResults] = useState({});
 	const [poll, setPoll] = useState(null);
 	const [openChat, setOpenChat] = useState(false);
-	const [copied, setCopied] = useState(null);
+	const [copied, setCopied] = useState(false);
 
 	const navigate = useNavigate();
 	const timeLeft = usePollTimer(poll);
 	const canAskQuestion = timeLeft === 0;
 
 	/* ===============================
-	   Fetch & Socket Listeners
+	   Fetch Active Poll + Socket
 	================================ */
 	useEffect(() => {
 		fetch(`${api}/api/poll/active`)
 			.then(res => res.json())
-			.then(setPoll);
+			.then(data => {
+				if (data?.active) setPoll(data);
+			})
+			.catch(err => console.error(err));
 
 		socket.on("poll_started", (newPoll) => {
 			setPoll(newPoll);
@@ -38,96 +41,102 @@ export default function TeacherLive() {
 			setResults(data);
 		});
 
+		socket.on("poll_ended", () => {
+			setPoll(null);
+		});
+
 		return () => {
 			socket.off("poll_started");
 			socket.off("poll_results");
+			socket.off("poll_ended");
 		};
-	}, []);
+	}, [socket]);
 
 	/* ===============================
-	   Auto End Poll
+	   Auto End Poll When Timer Ends
 	================================ */
 	useEffect(() => {
 		if (timeLeft === 0 && poll?._id) {
 			socket.emit("end_poll", poll._id);
 		}
-	}, [timeLeft]);
+	}, [timeLeft, poll?._id, socket]);
 
 	/* ===============================
-	   Share Poll Function
+	   FIXED SHARE LINK (Production Safe)
 	================================ */
-	const handleShare = () => {
-		const link = `${window.location.origin}/student`;
+	const handleShare = async () => {
+		const link = `${window.location.origin}/student/poll`;
 
-		navigator.clipboard.writeText(link);
+		try {
+			await navigator.clipboard.writeText(link);
+			setCopied(true);
+		} catch (err) {
+			console.error("Copy failed:", err);
+		}
 
-		setCopied(link);
-
-		setTimeout(() => setCopied(null), 3000);
+		setTimeout(() => setCopied(false), 3000);
 	};
 
-	if (!poll) return null;
+	if (!poll) {
+		return (
+			<div className="min-h-screen flex items-center justify-center text-gray-500 text-lg">
+				No active poll running
+			</div>
+		);
+	}
 
 	const totalVotes = Object.values(results).reduce((a, b) => a + b, 0);
 
 	return (
-		<div className="min-h-screen bg-white relative">
+		<div className="min-h-screen bg-white relative px-10">
 
-			{/* History Button */}
-			<div className="w-66.75 h-13.25 mt-15.5 ml-280 rounded-[34px] bg-[#8F64E1] cursor-pointer flex items-center justify-center shadow-lg hover:scale-105 transition">
+			{/* Top Controls */}
+			<div className="flex justify-between items-center mt-10">
+
 				<button
 					onClick={() => navigate("/teacher/history")}
-					className="font-[Sora] font-semibold text-[18px] text-white leading-none flex items-center gap-2"
+					className="flex items-center gap-2 px-6 py-3 rounded-full 
+					bg-gradient-to-r from-[#8F64E1] to-[#1D68BD]
+					text-white font-semibold shadow-lg hover:scale-105 transition"
 				>
-					<Eye size={25} className="text-white" />
-					View Poll history
+					<Eye size={20} />
+					View Poll History
 				</button>
-			</div>
-
-			{/* Question + Timer + Share */}
-			<div className="flex items-center justify-between ml-91 mt-8.5 w-181.75 relative">
-
-				<div className="flex items-center gap-4">
-					<h1 className="font-[Sora] text-[22px] font-semibold leading-none">
-						Question
-					</h1>
-
-					<p className="text-red-500 font-semibold animate-pulse">
-						{timeLeft}s remaining
-					</p>
-				</div>
 
 				<button
 					onClick={handleShare}
-					className="flex items-center gap-2 px-6 py-2 rounded-full 
+					className="flex items-center gap-2 px-6 py-3 rounded-full 
 					bg-gradient-to-r from-[#8F64E1] via-indigo-500 to-[#1D68BD]
-					text-white font-semibold text-[15px]
-					shadow-lg hover:shadow-purple-400/50
-					transition-all duration-300 hover:scale-110"
+					text-white font-semibold shadow-lg hover:scale-110 transition"
 				>
-					<Share2 size={18} />
-					Share Poll
+					{copied ? <Check size={18} /> : <Share2 size={18} />}
+					{copied ? "Copied!" : "Share Poll"}
 				</button>
+			</div>
 
-				{/* URL Display Toast */}
-				{copied && (
-					<div className="absolute right-0 -bottom-14 bg-black text-white text-xs px-4 py-3 rounded-lg shadow-lg animate-bounce max-w-xs">
-						<p className="break-all text-center">
-							{copied}
-						</p>
-					</div>
-				)}
+			{/* Question + Timer */}
+			<div className="mt-12 flex items-center justify-between">
+				<h1 className="text-2xl font-semibold">
+					Live Question
+				</h1>
+
+				<p className="text-red-500 font-bold text-lg animate-pulse">
+					⏳ {timeLeft}s remaining
+				</p>
 			</div>
 
 			{/* Poll Card */}
-			<div className="w-181.75 h-88.25 mt-6.25 ml-91 gap-3.5">
-				<div className="h-12.25 w-181.75 rounded-t-[10px] p-4 bg-gradient-to-r from-[#343434] to-[#6E6E6E]">
-					<h2 className="font-[Sora] font-semibold text-white text-[17px] leading-none">
+			<div className="mt-6 border rounded-xl shadow-md overflow-hidden">
+
+				{/* Question */}
+				<div className="bg-gradient-to-r from-[#343434] to-[#6E6E6E] p-5">
+					<h2 className="text-white text-lg font-semibold">
 						{poll.question}
 					</h2>
 				</div>
 
-				<div className="w-181.75 h-72.25 py-4.5 px-4 gap-4 flex flex-col">
+				{/* Options */}
+				<div className="p-6 space-y-4">
 					{poll.options.map((opt, index) => {
 						const count = results[index] || 0;
 						const percent = totalVotes
@@ -137,10 +146,7 @@ export default function TeacherLive() {
 						return (
 							<div
 								key={index}
-								className="relative flex items-center justify-between 
-								border-[1.5px] border-[#8F64E1] 
-								rounded-lg h-13.75 w-169.5 px-5 py-6
-								overflow-hidden bg-white shadow-sm hover:shadow-md transition"
+								className="relative border border-[#8F64E1] rounded-lg h-14 flex items-center justify-between px-5 overflow-hidden"
 							>
 								<div
 									className="absolute left-0 top-0 h-full bg-[#8F64E1] opacity-30 transition-all duration-500"
@@ -148,15 +154,15 @@ export default function TeacherLive() {
 								/>
 
 								<div className="relative z-10 flex items-center gap-3">
-									<div className="w-6 h-6 rounded-full bg-white text-[#6766D5] flex justify-center items-center shadow">
+									<div className="w-7 h-7 rounded-full bg-white text-[#6766D5] flex items-center justify-center shadow font-semibold">
 										{index + 1}
 									</div>
-									<span className="text-black text-[16px] font-[Sora] font-semibold">
+									<span className="font-semibold text-black">
 										{opt}
 									</span>
 								</div>
 
-								<div className="relative z-10 text-black font-semibold">
+								<div className="relative z-10 font-semibold text-black">
 									{percent}%
 								</div>
 							</div>
@@ -166,20 +172,23 @@ export default function TeacherLive() {
 			</div>
 
 			{/* Ask New Question */}
-			<div className="w-76.5 h-14.5 mt-7.25 ml-196.25 rounded-[34px] 
-			bg-gradient-to-r from-[#8F64E1] to-[#1D68BD] 
-			flex items-center justify-center shadow-lg hover:scale-105 transition">
+			<div className="flex justify-center mt-10">
 				<button
 					onClick={() => navigate("/teacher")}
 					disabled={!canAskQuestion}
-					className="font-[Sora] font-semibold text-[18px] text-white"
+					className={`px-10 py-4 rounded-full text-white font-semibold shadow-lg transition
+						${canAskQuestion
+							? "bg-gradient-to-r from-[#8F64E1] to-[#1D68BD] hover:scale-105"
+							: "bg-gray-400 cursor-not-allowed"
+						}`}
 				>
-					+ Ask a new question
+					+ Ask New Question
 				</button>
 			</div>
 
 			{/* Chat */}
 			<Chat onClick={() => setOpenChat(true)} className="cursor-pointer" />
+
 			{openChat && (
 				<ChatPopup
 					name="teacher"
@@ -188,7 +197,6 @@ export default function TeacherLive() {
 					onClose={() => setOpenChat(false)}
 				/>
 			)}
-
 		</div>
 	);
 }
