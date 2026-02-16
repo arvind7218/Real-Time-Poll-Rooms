@@ -31,12 +31,12 @@ export default function RoleSelect() {
                 <h3 className="font-[Sora] font-bold text-[42px] text-gray-900 leading-tight">
                     Welcome to the{" "}
                     <span className="bg-gradient-to-r from-[#8F64E1] to-[#1D68BD] bg-clip-text text-transparent">
-                        Live Polling System
+                        Real-Time Poll Rooms
                     </span>
                 </h3>
 
                 <p className="mt-4 font-[Sora] text-[18px] text-gray-500">
-                    Please select the role that best describes you to begin using the live polling system
+                    Please select the role that best describes you to begin using the Real-Time Poll Rooms
                 </p>
             </div>
 
