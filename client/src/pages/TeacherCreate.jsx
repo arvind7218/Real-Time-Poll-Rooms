@@ -82,7 +82,7 @@ export default function TeacherCreate() {
                 <option value={300}>5 Minutes</option>
                 <option value={600}>10 Minutes</option>
                 <option value={1800}>30 Minutes</option>
-                <option value={3600}>1 Minutes</option>
+                <option value={3600}>1 Hour</option>
               </select>
 
               <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
